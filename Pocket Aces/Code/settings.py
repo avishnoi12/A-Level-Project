@@ -34,7 +34,8 @@ def cancel(event):
 
     #if changes to settings have been made
     if popUp:
-        createPopUp("\nYou have unsaved changes.", quitSettings, close) #create a pop up
+        #createPopUp("\nYou have unsaved changes.", quitSettings, close) #create a pop up
+        newPopUp("Are you sure you want to leave?\nYou have unsaved changes.", quitSettings, SFXscale, (700,650))
         SFXscale.place_forget() #hiding slider temporarily
     else:
         quitSettings(None) #if no changes have been made
@@ -118,7 +119,7 @@ cancelButton = newButton(canvas, 65, 915, "cancel.fw.png", None, cancel)
 confirmButton = newButton(canvas, 1085, 915, "confirm.fw.png", None, confirm)
 
 #*Labels
-screenResLabel = newOptionLabel(canvas, 360, 310, "      SCREEN\n RESOLUTION:")
+screenResLabel = newOptionLabel(canvas, 360, 310, "SCREEN\n RESOLUTION:")
 
 texturePLabel = newOptionLabel(canvas, 360, 460, "TEXTURE PACK:")
 

@@ -4,6 +4,7 @@
 
 #!Imports
 
+from tkinter.constants import CENTER
 import pygame
 import json
 import threading
@@ -85,7 +86,34 @@ class newOptionLabel(object):
     def __init__(self, canvas, xCoOrd, yCoOrd, textLabel):
         self.physImage = ImageTk.PhotoImage(Image.open("../Entities/Icons/optionLabel.fw.png"))
         self.label = canvas.create_image(xCoOrd,yCoOrd,image=self.physImage, anchor=tk.NW)
-        self.text = canvas.create_text(xCoOrd+150, yCoOrd+50, text=textLabel, font=(FONTNAME,20), fill="white")
+        self.text = canvas.create_text(xCoOrd+150, yCoOrd+50, text=textLabel, font=(FONTNAME,20), fill="white", justify = CENTER)
+
+    def hover(self, canvas, xCoOrd, yCoOrd, helpText):
+        self.helpLabel = canvas.create_text(xCoOrd,yCoOrd,text=helpText, font=(FONTNAME,20), fill="white", justify = CENTER)
+
+class newPopUp(object):
+    def __init__(self, allText, func, scale, coOrds):
+        self.physImage = popUpImage = ImageTk.PhotoImage(Image.open("../Entities/Icons/popUp.png"))
+        self.popUpLabel = canvas.create_image(400, 400, image=popUpImage, anchor=tk.NW, tags="popUp")
+        self.text = canvas.create_text(875, 500, text=allText, font = (FONTNAME,40), fill = "white", tags="popUp", justify=CENTER)
+
+        if scale is not None:
+            closeFunc = partial(self.closePopUp, scale, coOrds)
+        else:
+            closeFunc = partial(self.closePopUp, None, None)
+
+        if func is None: #pop up requires single button (to close it)
+            closeImage = "okButton.png"
+        else:
+            self.leaveButton = newButton(canvas, 450, 660, "leave.fw.png", "popUp", func)
+            closeImage = "stay.fw.png"
+        self.closeButton = newButton(canvas, 1050, 660, closeImage, "popUp", closeFunc)
+    
+    def closePopUp(self, scale, coOrds, event):
+        buttonPressSound.play()
+        canvas.delete("popUp")
+        if scale is not None:
+            scale.place(x=coOrds[0], y=coOrds[1])
 
 #Subprograms
 
@@ -108,25 +136,10 @@ def setJson(filename, key, value):
     json.dump(obj, jsonFile, indent = 2) #writing new settings to json file
     jsonFile.close()
 
-def createPopUp(newText, leaveFunc, stayFunc):
-    global popUpImage, popUpLabel, stayButton, leaveButton
-    #creates a pop up that ensures user's decision
-
-    allText = "Are you sure you want to leave?" + newText
-    popUpImage = ImageTk.PhotoImage(Image.open("../Entities/Icons/popUp.png"))
-    popUpLabel = canvas.create_image(400, 400, image=popUpImage, anchor=tk.NW, tags="popUp")
-    canvas.create_text(875, 500, text=allText, font = (FONTNAME,40), fill = "white", tags="popUp")
-
-    stayButton = newButton(canvas, 1050, 660, "stay.fw.png", "popUp", stayFunc)
-    leaveButton = newButton(canvas, 450, 660, "leave.fw.png", "popUp", leaveFunc)
-
-def closePopUp(event):
-    buttonPressSound.play()
-    canvas.delete("popUp")
-
 def quitGame(event):
     buttonPressSound.play()
-    createPopUp("", exitGame, closePopUp)
+    #createPopUp("", exitGame, closePopUp)
+    newPopUp("Are you sure you want to leave?", exitGame, None, None)
 
 def runSettings(event):
     #pygame.mixer.stop()
