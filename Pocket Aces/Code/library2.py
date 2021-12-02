@@ -15,6 +15,9 @@ from PIL import Image, ImageTk
 from functools import partial
 
 #!Constants
+window = tk.Tk()
+canvas = tk.Canvas(window, width=1920, height=1080)
+canvas.pack()
 
 FONTNAME = "Berlin Sans FB"
 PRIMARYCOLOUR = "#11AD70"
@@ -35,7 +38,7 @@ class newButton(object):
         canvas.tag_bind(self.button, "<Button-1>", func) #making the image a button
 
     def addLabel(self, canvas, label, colour, centre, size, allTags, func):
-        self.buttonLabel = canvas.create_text(centre[0],centre[1],text=label, font=(FONTNAME,size), fill=colour, tags=allTags, justify=CENTER)
+        self.buttonLabel = canvas.create_text(centre[0],centre[1],text=label, font=(FONTNAME,size), fill=colour, tags=allTags)
         canvas.tag_bind(self.buttonLabel, "<Button-1>", func) #making the text a button
         #users will be able to click anywhere on the button (including text) to call the button's function
 
@@ -44,11 +47,11 @@ class newButton(object):
         canvas.itemconfigure(self.button, image=self.physImage)
 
 class newRadioButton(object):
-    def __init__(self, canvas, xCoOrd, yCoOrd, options, allTags, filename, key):
+    def __init__(self, canvas, xCoOrd, yCoOrd, options, allTags, name):
         self.buttons = [] #array of all button objects
         self.options = options
         self.value = tk.IntVar() #index of selected option
-        self.setDefault(filename, key)
+        self.setDefault(name)
 
         #creating buttonobject for each option
         for index, each in enumerate(options): 
@@ -74,8 +77,8 @@ class newRadioButton(object):
     def get(self): #returns the option selected from radio
         return self.options[self.value.get()]
 
-    def setDefault(self, filename, key):
-        newValue = getJson(filename, key)
+    def setDefault(self, name):
+        newValue = getJson("Settings.json",name)
         self.value.set(self.options.index(newValue)) #setting default value
 
 class newOptionLabel(object):
@@ -88,26 +91,24 @@ class newOptionLabel(object):
         self.helpLabel = canvas.create_text(xCoOrd,yCoOrd,text=helpText, font=(FONTNAME,20), fill="white", justify = CENTER)
 
 class newPopUp(object):
-    def __init__(self, canvas, allText, func, scale, coOrds):
-        self.physImage = popUpImage = ImageTk.PhotoImage(Image.open("../Entities/Icons/popUpNew.fw.png"))
+    def __init__(self, allText, func, scale, coOrds):
+        self.physImage = popUpImage = ImageTk.PhotoImage(Image.open("../Entities/Icons/popUp.png"))
         self.popUpLabel = canvas.create_image(400, 400, image=popUpImage, anchor=tk.NW, tags="popUp")
         self.text = canvas.create_text(875, 500, text=allText, font = (FONTNAME,40), fill = "white", tags="popUp", justify=CENTER)
 
         if scale is not None:
-            closeFunc = partial(self.closePopUp, canvas, scale, coOrds)
+            closeFunc = partial(self.closePopUp, scale, coOrds)
         else:
-            closeFunc = partial(self.closePopUp, canvas, None, None)
+            closeFunc = partial(self.closePopUp, None, None)
 
         if func is None: #pop up requires single button (to close it)
-            closeText = "OK"
+            closeImage = "okButton.png"
         else:
-            self.leaveButton = newButton(canvas, 500, 660, "redButton.fw.png", "popUp", func)
-            self.leaveButton.addLabel(canvas, "LEAVE", "white", (615,700), 30, "popUp", func)
-            closeText = "STAY"
-        self.closeButton = newButton(canvas, 1050, 660, "greenButton.fw.png", "popUp", closeFunc)
-        self.closeButton.addLabel(canvas, closeText, "white", (1165,700), 30, "popUp", closeFunc)
+            self.leaveButton = newButton(canvas, 450, 660, "leave.fw.png", "popUp", func)
+            closeImage = "stay.fw.png"
+        self.closeButton = newButton(canvas, 1050, 660, closeImage, "popUp", closeFunc)
     
-    def closePopUp(self, canvas, scale, coOrds, event):
+    def closePopUp(self, scale, coOrds, event):
         buttonPressSound.play()
         canvas.delete("popUp")
         if scale is not None:
@@ -121,11 +122,10 @@ def readJson(filename):
     obj = json.loads(jsonFile.read())
     return obj
 
-def getJson(filename, keys):
+def getJson(filename, key):
     #opening the settings json
     obj = readJson(filename)
-    for key in keys:
-        temp = obj[key] #storing requred data
+    temp = obj[key] #storing requred data
     return temp
 
 def setJson(filename, key, value):
@@ -134,18 +134,20 @@ def setJson(filename, key, value):
     jsonFile = open(filename, "w")
     json.dump(obj, jsonFile, indent = 2) #writing new settings to json file
     jsonFile.close()
+
+def quitGame(event):
+    buttonPressSound.play()
+    #createPopUp("", exitGame, closePopUp)
+    newPopUp("Are you sure you want to leave?", exitGame, None, None)
+
+def runSettings(event):
+    #pygame.mixer.stop()
+    buttonPressSound.play()
+    os.system('py settings.py')
+    exit()
     
 def exitGame(event):
     buttonPressSound.play()
     setJson("Settings.json","BgMusic",False)
     time.sleep(0.5)
     exit()
-
-
-#background music
-if not getJson("Settings.json","BgMusic"):
-    bgMusic = pygame.mixer.music.load("../Entities/SFX/bgMusic.mp3")
-    pygame.mixer.music.play(-1)
-    setJson("Settings.json", "BgMusic", True)
-pygame.mixer.music.set_volume((getJson("Settings.json","Volume"))/100)
-print(pygame.mixer.music.get_volume())

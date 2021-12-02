@@ -1,7 +1,12 @@
 {
-  "ScreenRes": "1080p",
-  "TexturePack": "GREEN",
-  "Volume": 25,
-  "Tutor": "ON",
-  "BgMusic": false
+  "ScreenRes": "OFF",
+  "TexturePack": "RED",
+  "Volume": 41,
+  "Tutor": "OFF",
+  "BgMusic": true,
+  "MaxPlayer": "9",
+  "StartStack": 20,
+  "GameType": "SINGLE",
+  "AI Level": "NOVICE",
+  "Assists": "ON"
 }
