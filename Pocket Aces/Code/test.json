@@ -1,9 +1,9 @@
 {
   "settings": {
-    "FullScreen": "ON",
-    "TexturePack": "GREEN",
-    "Volume": 14,
-    "Tutor": "ON"
+    "ScreenRes": "OFF",
+    "TexturePack": "RED",
+    "Volume": 41,
+    "Tutor": "OFF"
   },
   "options": {
     "Running": false,

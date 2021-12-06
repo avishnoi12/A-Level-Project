@@ -35,6 +35,21 @@ def openNewGame(window, event):
 #!main program
 def runTitleScreen(window):
     global canvas
+
+    print("Running Title Screen...")
+
+    #*configuring settings
+    #Volume settings
+    settingsVolume = (getJson("Settings.json",("settings","Volume")))/100
+    pygame.mixer.music.set_volume(round(settingsVolume,2))
+    buttonPressSound.set_volume(round(settingsVolume,2))
+
+    #Fullscreen settings
+    if getJson("Settings.json",("settings","FullScreen")) == "ON":
+        window.attributes("-fullscreen", True) #setting to fullscreen
+    else:
+        window.attributes("-fullscreen", False) #setting to windowed
+
     canvas = tk.Canvas(window, width=1920, height=1080)
     canvas.pack()
     #!Images

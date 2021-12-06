@@ -26,8 +26,10 @@ from functools import partial
 #*Creating the window
 window = tk.Tk()
 window.geometry("1920x1080")
-#window.attributes("-fullscreen", True) #setting to fullscreen
 window.title("Pocket Aces")
 print("Running main...")
+
+if getJson("Settings.json",("settings","FullScreen")) == "ON":
+    window.attributes("-fullscreen", True) #setting to fullscreen
 
 titleScreen.runTitleScreen(window)

@@ -25,7 +25,12 @@ def cancel(window, event):
 
     #loading previous and new settings
     obj = readJson("Settings.json")
-    jsonString = newSettings()
+    obj = obj["settings"]
+    jsonString = {}
+    jsonString["FullScreen"] = fullScreenButtons.get()
+    jsonString["TexturePack"] = texturePackButtons.get()
+    jsonString["Volume"] = SFXscale.get()
+    jsonString["Tutor"] = tutorButtons.get()
 
     #checking if previous settings are same as new
     popUp = False
@@ -41,12 +46,6 @@ def cancel(window, event):
         SFXscale.place_forget() #hiding slider temporarily
     else:
         titleScreenFunc(None) #if no changes have been made
-
-def close(event):
-    #clicked 'stay' on the pop up screen
-    buttonPressSound.play() #playijng button press sound
-    canvas.delete("popUp") #deleting pop up
-    SFXscale.place(x=700,y=650) #unhiding slider
 
 def openTitleScreen(window, event):
     #clicked 'leave' on the pop up screen
@@ -64,30 +63,23 @@ def SFXupdate(event):
 def confirm(window, event):
     #saving settings
     buttonPressSound.play()
-    jsonString = newSettings() #creating dictionary of all selected settings
+    obj = readJson("Settings.json")
+    obj["settings"]["FullScreen"] = fullScreenButtons.get()
+    obj["settings"]["TexturePack"] = texturePackButtons.get()
+    obj["settings"]["Volume"] = SFXscale.get()
+    obj["settings"]["Tutor"] = tutorButtons.get()
 
     settingsFile = open("Settings.json","w")
-    json.dump(jsonString, settingsFile, indent = 2) #writing new settings to json file
+    json.dump(obj, settingsFile, indent = 2) #writing new settings to json file
     settingsFile.close()
 
     #os.system('py main.py') #returning to title screen
     openTitleScreen(window, None)
     exit()
 
-def newSettings():
-    #creating dictionary of all selected settings
-    jsonString = {}
-    jsonString["ScreenRes"] = screenResButtons.get()
-    jsonString["TexturePack"] = texturePackButtons.get()
-    jsonString["Volume"] = SFXscale.get()
-    jsonString["Tutor"] = tutorButtons.get()
-    jsonString["BgMusic"] = True
-    return jsonString
-
-print("Running settings...")
-
 def runSettings(window):
-    global SFXlabel, SFXscale, texturePackButtons, screenResButtons, tutorButtons, canvas
+    print("Running settings...")
+    global SFXlabel, SFXscale, texturePackButtons, fullScreenButtons, tutorButtons, canvas
     canvas = tk.Canvas(window, width=1920, height=1080)
     canvas.pack()
     #!Images
@@ -104,28 +96,30 @@ def runSettings(window):
     screenTitle = canvas.create_image(430,130, image=titleImage, anchor=tk.NW)
 
     #*Radio buttons
-    screenResButtons = newRadioButton(canvas, 700,330,["ON","OFF"],("settings"),"Settings.json","ScreenRes")
+    fullScreenButtons = newRadioButton(canvas, 700,330,["ON","OFF"],("settings"),"Settings.json",("settings","FullScreen"))
 
-    texturePackButtons = newRadioButton(canvas, 700,480,["RED","GREEN","BLUE"],("settings"),"Settings.json","TexturePack")
+    texturePackButtons = newRadioButton(canvas, 700,480,["RED","GREEN","BLUE"],("settings"),"Settings.json",("settings","TexturePack"))
 
-    tutorButtons = newRadioButton(canvas, 700,780,["ON","OFF"],("settings"),"Settings.json","Tutor")
+    tutorButtons = newRadioButton(canvas, 700,780,["ON","OFF"],("settings"),"Settings.json",("settings","Tutor"))
 
     #*SFX slider
     SFXscale = tk.Scale(canvas, from_=0, to=100, orient=HORIZONTAL, font=(FONTNAME,20), bg=TERTARYCOLOUR, activebackground="white"
         ,length=380, troughcolor=PRIMARYCOLOUR, sliderlength=20, command=SFXupdate, showvalue=0, width=20)
-    SFXscale.set(getJson("Settings.json","Volume"))
+    SFXscale.set(getJson("Settings.json",("settings","Volume")))
     SFXscale.place(x=700,y=650)
     SFXlabel = canvas.create_text(1140,660, text=str(SFXscale.get())+"%",fill="white",font=(FONTNAME,30))
 
     #*Buttons
     cancelFunc = partial(cancel, window)
-    cancelButton = newButton(canvas, 65, 915, "cancel.fw.png", None, cancelFunc)
+    cancelButton = newButton(canvas, 65, 915, "redButton.fw.png", None, cancelFunc)
+    cancelButton.addLabel(canvas, "CANCEL", "white", (180,960), 30, None, cancelFunc)
 
     confirmFunc = partial(confirm, window)
-    confirmButton = newButton(canvas, 1085, 915, "confirm.fw.png", None, confirmFunc)
+    confirmButton = newButton(canvas, 1085, 915, "greenButton.fw.png", None, confirmFunc)
+    confirmButton.addLabel(canvas, "CONFIRM", "white", (1200,960), 30, None, confirmFunc)
 
     #*Labels
-    screenResLabel = newOptionLabel(canvas, 360, 310, "FULLSCREEN:")
+    fullScreenLabel = newOptionLabel(canvas, 360, 310, "FULLSCREEN:")
 
     texturePLabel = newOptionLabel(canvas, 360, 460, "TEXTURE PACK:")
 

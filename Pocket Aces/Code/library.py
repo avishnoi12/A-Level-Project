@@ -44,11 +44,11 @@ class newButton(object):
         canvas.itemconfigure(self.button, image=self.physImage)
 
 class newRadioButton(object):
-    def __init__(self, canvas, xCoOrd, yCoOrd, options, allTags, filename, key):
+    def __init__(self, canvas, xCoOrd, yCoOrd, options, allTags, filename, keys):
         self.buttons = [] #array of all button objects
         self.options = options
         self.value = tk.IntVar() #index of selected option
-        self.setDefault(filename, key)
+        self.setDefault(filename, keys)
 
         #creating buttonobject for each option
         for index, each in enumerate(options): 
@@ -74,9 +74,24 @@ class newRadioButton(object):
     def get(self): #returns the option selected from radio
         return self.options[self.value.get()]
 
-    def setDefault(self, filename, key):
-        newValue = getJson(filename, key)
+    def setDefault(self, filename, keys):
+        newValue = getJson(filename, keys)
         self.value.set(self.options.index(newValue)) #setting default value
+
+    def greyOrUngrey(self, canvas, grey):
+        for index, each in enumerate(self.buttons): 
+            if index == self.value.get(): #choosing which image to use
+                imgPath = "selected.fw.png"
+            else:
+                imgPath = "option.fw.png"
+            
+            if grey:
+                each.changeImage(canvas, "g_"+imgPath)
+                canvas.tag_unbind(each.button)
+            else:
+                func = partial(self.clicked, canvas, index) #function to be called when clicked
+                each.changeImage(canvas, imgPath)
+                canvas.tag_bind(each.button, "<Button-1>", func)
 
 class newOptionLabel(object):
     def __init__(self, canvas, xCoOrd, yCoOrd, textLabel):
@@ -124,28 +139,33 @@ def readJson(filename):
 def getJson(filename, keys):
     #opening the settings json
     obj = readJson(filename)
+    temp = obj
     for key in keys:
-        temp = obj[key] #storing requred data
+        temp = temp[key] #storing requred data
     return temp
 
-def setJson(filename, key, value):
+def setJson(filename, keys, value):
     obj = readJson(filename)
-    obj[key] = value
+    temp = obj
+    for key in (keys):
+        temp = temp[key]
+    temp = value
     jsonFile = open(filename, "w")
     json.dump(obj, jsonFile, indent = 2) #writing new settings to json file
     jsonFile.close()
     
 def exitGame(event):
     buttonPressSound.play()
-    setJson("Settings.json","BgMusic",False)
-    time.sleep(0.5)
+    setJson("Settings.json",("options","Running"),False)
+    time.sleep(0.25)
+    print("Quitting game...")
     exit()
 
-
 #background music
-if not getJson("Settings.json","BgMusic"):
-    bgMusic = pygame.mixer.music.load("../Entities/SFX/bgMusic.mp3")
-    pygame.mixer.music.play(-1)
-    setJson("Settings.json", "BgMusic", True)
-pygame.mixer.music.set_volume((getJson("Settings.json","Volume"))/100)
-print(pygame.mixer.music.get_volume())
+bgMusic = pygame.mixer.music.load("../Entities/SFX/bgMusic.mp3")
+pygame.mixer.music.play(-1)
+setJson("Settings.json", ("options","Running"), True)
+settingsVolume = (getJson("Settings.json",("settings","Volume")))/100
+pygame.mixer.music.set_volume(round(settingsVolume,2))
+buttonPressSound.set_volume(round(settingsVolume,2))
+print("Opened library...")
