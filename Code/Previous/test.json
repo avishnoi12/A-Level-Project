@@ -1,0 +1,16 @@
+{
+  "settings": {
+    "ScreenRes": "OFF",
+    "TexturePack": "RED",
+    "Volume": 41,
+    "Tutor": "OFF"
+  },
+  "options": {
+    "Running": false,
+    "MaxPlayer": "9",
+    "StartStack": 20,
+    "GameType": "SINGLE",
+    "AI Level": "NOVICE",
+    "Assists": "ON"
+  }
+}
