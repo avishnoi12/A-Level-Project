@@ -1,0 +1,27 @@
+{
+  "allPlayers": [
+    {
+      "name": "You",
+      "balance": 375,
+      "position": "SB",
+      "user": true
+    },
+    {
+      "name": "Steve",
+      "balance": 400,
+      "position": "BB",
+      "user": false
+    },
+    {
+      "name": "Iain",
+      "balance": 400,
+      "position": "BTN",
+      "user": false
+    }
+  ],
+  "Gameplay": {
+    "maxPlayers": 6,
+    "levelAI": "EXPERT",
+    "Tutor": "OFF"
+  }
+}

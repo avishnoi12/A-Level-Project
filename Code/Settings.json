@@ -1,0 +1,16 @@
+{
+  "settings": {
+    "FullScreen": "OFF",
+    "TexturePack": "GREEN",
+    "Volume": 16,
+    "Tutor": "ON",
+    "Name": "Impostor"
+  },
+  "options": {
+    "MaxPlayer": "6",
+    "StartStack": 20,
+    "GameType": "MULTI",
+    "AI Level": "NOVICE",
+    "Time": 10
+  }
+}

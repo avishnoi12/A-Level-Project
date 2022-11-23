@@ -11,11 +11,19 @@ import os
 import tkinter as tk
 from PIL import Image, ImageTk
 from functools import partial
+import server as srvr
+import client as clnt
+import socket
 
 def stackUpdate(event):
     #*Updating label for volume
     labelText = str(startStackscale.get()) + " BIG BLINDS"
     canvas.itemconfigure(startStackLabel, text=labelText)
+
+def timerScaleUpdate(event):
+    #*Updating label for time
+    labelText = str(timerScale.get()) + " SECONDS"
+    canvas.itemconfigure(timerScaleLabel, text=labelText)
 
 def openTitleScreen(window, event):
     #*CANCEL button pressed
@@ -29,7 +37,7 @@ def updateOptions():
     obj = readJson("Settings.json")
     obj["options"]["MaxPlayer"] = maxPlayersButton.get()
     obj["options"]["StartStack"] = startStackscale.get()
-    obj["options"]["Assists"] = assistsButton.get()
+    obj["options"]["Time"] = timerScale.get()
     obj["options"]["AI Level"] = AILevelButton.get()
     obj["options"]["GameType"] = gameTypeButton.get()
 
@@ -40,9 +48,22 @@ def updateOptions():
 def openGameplay(window, event):
     buttonPressSound.play()
     updateOptions() #updating options
-    canvas.destroy()
-    gameplay.createGameplay(window)
-    exit()
+    if getJson("Settings.json",("options","GameType")) == "MULTI": # create server
+        HOST = socket.gethostbyname(socket.gethostname())
+        try: #validation for creation of server
+            srvr.createNewServer()
+        except:
+            print("Cannot create server")
+        else: #server created fine
+            #create a client
+            clnt.connectToServer(HOST)
+            #run the gameplay
+            canvas.destroy()
+            gameplay.runMultiGameplay(window)
+    else:
+        canvas.destroy()
+        gameplay.runGameplay(window)
+        exit()
 
 def joinGame(window, event):
     global popUp, entryBox, goButton, cancelButton
@@ -63,7 +84,7 @@ def joinGame(window, event):
     cancelButton = newButton(canvas, 500, 660, "redButton.fw.png", "popUp", closeFunc)
     cancelButton.addLabel(canvas, "CANCEL", "white", (615,700), 30, "popUp", closeFunc) 
 
-    openFunc = partial(openGameplay, window)
+    openFunc = partial(connectToSever, window)
     goButton = newButton(canvas, 1050, 660, "greenButton.fw.png", "popUp", openFunc)
     goButton.addLabel(canvas, "GO", "white", (1165, 700), 30, "popUp", openFunc)
 
@@ -86,7 +107,7 @@ def loadGame(window, event):
     listb.place(x=500,y=450)
 
     #*Buttons
-    openFunc = partial(openGameplay, window)
+    openFunc = partial(tryLoad, window)
     loadSaveButton = newButton(canvas, 1050, 660, "greenButton.fw.png", "popUp", openFunc)
     loadSaveButton.addLabel(canvas, "LOAD", "white", (1165,700), 30, "popUp", openFunc) 
 
@@ -100,9 +121,33 @@ def closePopUp(toBeDeleted, event):
     startStackscale.place(x=700,y=480)
     toBeDeleted.destroy()
 
+def tryLoad(window, event):
+    buttonPressSound.play()
+    if listb.get(tk.ANCHOR) == "":
+        pass
+    else:
+        fileName = listb.get(tk.ANCHOR)
+        updateOptions() #updating options
+        canvas.destroy()
+        gameplay.loadGameplay(window, fileName)
+        exit()
+
+def connectToSever(window, event):
+    if entryBox.get() != "":
+        HOST = entryBox.get()
+        try:
+            clnt.connectToServer(HOST)
+        except:
+            print("Cannot connect")
+        else:
+            entryBox.delete(0, END)
+            updateOptions() #updating options
+            canvas.destroy()
+            gameplay.joinGameplay(window)
+
 #!main function
 def runNewGame(window):
-    global maxPlayersButton, gameTypeButton, AILevelButton, assistsButton, startStackscale, startStackLabel, canvas
+    global maxPlayersButton, gameTypeButton, AILevelButton, timerScale, timerScaleLabel, startStackscale, startStackLabel, canvas
 
     print("Running new game...")
     canvas = tk.Canvas(window, width=1920, height=1080)
@@ -126,7 +171,7 @@ def runNewGame(window):
 
     AILevelButton = newRadioButton(canvas, 700, 780, ["NOVICE","PRO", "EXPERT"], ("newGame"), "Settings.json", ("options","AI Level"))
 
-    assistsButton = newRadioButton(canvas, 700, 930, ["ON","OFF"], ("newGame"), "Settings.json", ("options","Assists"))
+    #assistsButton = newRadioButton(canvas, 700, 930, ["ON","OFF"], ("newGame"), "Settings.json", ("options","Assists"))
 
     #*starting stack slider
     startStackscale = tk.Scale(canvas, from_=5, to=50, orient=tk.HORIZONTAL, font=(FONTNAME,20), bg=TERTARYCOLOUR, activebackground="white"
@@ -134,6 +179,13 @@ def runNewGame(window):
     startStackscale.set(getJson("Settings.json",("options","StartStack")))
     startStackscale.place(x=700,y=500)
     startStackLabel = canvas.create_text(900,550, text=str(startStackscale.get())+" BIG BLINDS",fill="white",font=(FONTNAME,30))
+
+    #*timer slider
+    timerScale = tk.Scale(canvas, from_=10, to=30, orient=tk.HORIZONTAL, font=(FONTNAME,20), bg=TERTARYCOLOUR, activebackground="white"
+        ,length=300, troughcolor=PRIMARYCOLOUR, sliderlength=20, command=timerScaleUpdate, showvalue=0, width=20)
+    timerScale.set(getJson("Settings.json",("options","Time")))
+    timerScale.place(x=700,y=930)
+    timerScaleLabel = canvas.create_text(850,1000, text=str(timerScale.get())+" SECONDS",fill="white",font=(FONTNAME,30))
 
     #*Buttons
     cancelFunc = partial(openTitleScreen, window)
@@ -161,6 +213,7 @@ def runNewGame(window):
 
     AILevelLabel = newOptionLabel(canvas, 360, 760, "AI LEVEL:")
 
-    assistsLabel = newOptionLabel(canvas, 360, 910, "ASSISTS\nALLOWED:")
+    #assistsLabel = newOptionLabel(canvas, 360, 910, "ASSISTS\nALLOWED:")
+    timerLabel = newOptionLabel(canvas, 360, 910, "TIME PER\nGO:")
 
     window.mainloop()

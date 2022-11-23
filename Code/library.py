@@ -7,15 +7,14 @@
 
 #!Imports
 
-from tkinter.constants import CENTER, E
+import sys
+from tkinter.constants import CENTER
 import pygame
 import json
 import time
 import tkinter as tk
 from PIL import Image, ImageTk
 from functools import partial
-
-from pygame.constants import CONTROLLER_BUTTON_LEFTSTICK
 
 #!Constants
 
@@ -24,6 +23,9 @@ BOLDFONT = "Berlin Sans FB Demi"
 PRIMARYCOLOUR = "#11AD70"
 SECONDARYCOLOUR = "#13D186"
 TERTARYCOLOUR = "#0E8D5A"
+
+PORT = 9090
+FORMAT = "utf-8"
 
 #!Classes
 
@@ -137,6 +139,7 @@ class preSelectButtons(object):
             btn.changeImage(canvas, self.folder+"g_"+self.imgPaths[index]) #changing image
             
     def enable(self, canvas, index): #enables a single button
+        self.place(canvas)
         btn = self.buttons[index]
         btn.changeImage(canvas, self.folder+self.imgPaths[index])
         btn.binded = canvas.tag_bind(btn.button, "<Button-1>", btn.func)
@@ -193,11 +196,26 @@ def setJson(filename, keys, value):
     json.dump(obj, jsonFile, indent = 2) #writing new settings to json file
     jsonFile.close()
     
-def exitGame(event):
+def writeJson(path, filename, data):
+    fileNamePath = path+filename+".json"
+    with open(fileNamePath, "w") as fp:
+        json.dump(data, fp, indent = 2)
+
+def exitGame(window, event):
     buttonPressSound.play()
     time.sleep(0.25)
     print("Quitting game...")
-    exit()
+    window.destroy()
+    sys.exit()
+
+def muteFunc(event):
+    pygame.mixer.music.set_volume(0)
+    buttonPressSound.set_volume(0)
+
+def unMuteFunc(event):
+    settingsVolume = (getJson("Settings.json",("settings","Volume")))/100
+    pygame.mixer.music.set_volume(round(settingsVolume,2))
+    buttonPressSound.set_volume(round(settingsVolume,2))
 
 #!music and sfx
 pygame.mixer.init() #initialises music feature
@@ -206,6 +224,30 @@ settingsVolume = (getJson("Settings.json",("settings","Volume")))/100 #gets volu
 #*Button press sound effect
 buttonPressSound = pygame.mixer.Sound("../Entities/SFX/buttonPress.wav")
 buttonPressSound.set_volume(round(settingsVolume,2)) #sets the volume to the value from json file
+
+callSound = pygame.mixer.Sound("../Entities/SFX/call.wav")
+callSound.set_volume(round(settingsVolume,2)) #sets the volume to the value from json file
+
+checkSound = pygame.mixer.Sound("../Entities/SFX/check.wav")
+#checkSound is too quiet - so no need to set its volume
+
+raiseSound = pygame.mixer.Sound("../Entities/SFX/raise.wav")
+raiseSound.set_volume(round(settingsVolume,2)) #sets the volume to the value from json file
+
+dealSound = pygame.mixer.Sound("../Entities/SFX/dealAround.wav")
+dealSound.set_volume(round(settingsVolume,2)) #sets the volume to the value from json file
+
+dealSingleSound = pygame.mixer.Sound("../Entities/SFX/dealSingle.wav")
+dealSingleSound.set_volume(round(settingsVolume,2)) #sets the volume to the value from json file
+
+collectPotSound = pygame.mixer.Sound("../Entities/SFX/collectPot.wav")
+collectPotSound.set_volume(round(settingsVolume,2)) #sets the volume to the value from json file
+
+foldSound = pygame.mixer.Sound("../Entities/SFX/fold.wav")
+foldSound.set_volume(round(settingsVolume,2)) #sets the volume to the value from json file
+
+shuffleSound = pygame.mixer.Sound("../Entities/SFX/shuffle.wav")
+shuffleSound.set_volume(round(settingsVolume,2)) #sets the volume to the value from json file
 
 #*background music
 bgMusic = pygame.mixer.music.load("../Entities/SFX/bgMusic.mp3")

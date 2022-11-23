@@ -1,0 +1,45 @@
+{
+  "allPlayers": [
+    {
+      "name": "You",
+      "balance": 95,
+      "position": "CO",
+      "user": true
+    },
+    {
+      "name": "Sue",
+      "balance": 190,
+      "position": "BTN",
+      "user": false
+    },
+    {
+      "name": "Steve",
+      "balance": 43,
+      "position": "SB",
+      "user": false
+    },
+    {
+      "name": "Iain",
+      "balance": 190,
+      "position": "BB",
+      "user": false
+    },
+    {
+      "name": "Vin",
+      "balance": 477,
+      "position": "UTG",
+      "user": false
+    },
+    {
+      "name": "Wendy",
+      "balance": 190,
+      "position": "HJ",
+      "user": false
+    }
+  ],
+  "Gameplay": {
+    "maxPlayers": 6,
+    "levelAI": "EXPERT",
+    "Tutor": "OFF"
+  }
+}
